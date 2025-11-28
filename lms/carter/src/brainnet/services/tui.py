@@ -1,8 +1,10 @@
 """
-Brainnet Terminal UI (TUI) - Blue-themed terminal interface
+Carter Terminal UI (TUI) - Blue-themed terminal interface
+
+Phi-3.5-Vision-Instruct via NVIDIA NIM for ETHUSDT-PERP scalping.
 
 Features:
-1. Market selection with pagination
+1. Market selection with pagination (crypto-focused)
 2. Timeframe selection (1m, 5m, 15m, 1h, 4h, 1d)
 3. Quick Score View: Score 0-100 (0=short, 100=long)
 4. Detailed Stats: Press 2 for detailed analysis, 0 to return to menu
@@ -108,23 +110,23 @@ class AnalysisResult:
 # MARKET & INTERVAL CONFIGURATION
 # ============================================================================
 
-# All available markets (paginated)
+# All available markets (paginated) - crypto-focused for Carter
 ALL_MARKETS = [
-    # Page 1: Crypto
-    ("BTC", "BTC-USD", "Bitcoin"),
+    # Page 1: Crypto Perpetuals (primary focus)
     ("ETH", "ETH-USD", "Ethereum"),
+    ("BTC", "BTC-USD", "Bitcoin"),
     ("SOL", "SOL-USD", "Solana"),
     ("XRP", "XRP-USD", "Ripple"),
-    # Page 2: Index Futures
+    # Page 2: More Crypto
+    ("AVAX", "AVAX-USD", "Avalanche"),
+    ("MATIC", "MATIC-USD", "Polygon"),
+    ("LINK", "LINK-USD", "Chainlink"),
+    ("DOGE", "DOGE-USD", "Dogecoin"),
+    # Page 3: Index Futures
     ("ES", "ES=F", "S&P 500 Futures"),
     ("NQ", "NQ=F", "Nasdaq Futures"),
     ("YM", "YM=F", "Dow Futures"),
     ("RTY", "RTY=F", "Russell 2000 Futures"),
-    # Page 3: ETFs
-    ("SPY", "SPY", "S&P 500 ETF"),
-    ("QQQ", "QQQ", "Nasdaq 100 ETF"),
-    ("IWM", "IWM", "Russell 2000 ETF"),
-    ("DIA", "DIA", "Dow Jones ETF"),
     # Page 4: Commodities
     ("GC", "GC=F", "Gold Futures"),
     ("SI", "SI=F", "Silver Futures"),
@@ -325,8 +327,8 @@ def draw_header():
     clear_screen()
     print()
     print(f"{c.CYAN}{c.BOLD}  ╔══════════════════════════════════════════════════════╗{c.RESET}")
-    print(f"{c.CYAN}{c.BOLD}  ║                    🧠 BRAINNET                        ║{c.RESET}")
-    print(f"{c.CYAN}{c.BOLD}  ║         Adaptive Quant Trading System                 ║{c.RESET}")
+    print(f"{c.CYAN}{c.BOLD}  ║                     🧠 CARTER                         ║{c.RESET}")
+    print(f"{c.CYAN}{c.BOLD}  ║       Phi-3.5-Vision • NVIDIA NIM • Scalper          ║{c.RESET}")
     print(f"{c.CYAN}{c.BOLD}  ╚══════════════════════════════════════════════════════╝{c.RESET}")
     print()
 
@@ -341,8 +343,8 @@ def run_analysis(symbol: str, name: str, interval: str, period: str,
     Run market analysis and return score.
     
     Args:
-        symbol: Trading symbol (e.g., "BTC-USD")
-        name: Display name (e.g., "Bitcoin")
+        symbol: Trading symbol (e.g., "ETH-USD")
+        name: Display name (e.g., "Ethereum")
         interval: yfinance interval (e.g., "5m", "1h", "1d")
         period: yfinance period (e.g., "1d", "1mo", "1y")
         lookback: Number of bars for GAF analysis
@@ -760,14 +762,14 @@ def display_menu(page: int = 0) -> Optional[Tuple[str, str, str, str, int]]:
     current_markets = ALL_MARKETS[start_idx:end_idx]
     
     # Page categories
-    page_titles = ["🪙 CRYPTO", "📊 INDEX FUTURES", "📈 ETFs", "🛢️ COMMODITIES"]
+    page_titles = ["🪙 CRYPTO", "🪙 MORE CRYPTO", "📊 INDEX FUTURES", "🛢️ COMMODITIES"]
     page_title = page_titles[page] if page < len(page_titles) else f"PAGE {page + 1}"
     
     # Arrow indicators for pagination
     left_arrow = f"{c.CYAN}◀{c.RESET}" if page > 0 else f"{c.GRAY}◁{c.RESET}"
     right_arrow = f"{c.CYAN}▶{c.RESET}" if page < total_pages - 1 else f"{c.GRAY}▷{c.RESET}"
     
-    print(f"{c.GRAY}     Powered by Phi-3.5-Mini • GAF • ConvNeXt{c.RESET}")
+    print(f"{c.GRAY}     Powered by Phi-3.5-Vision • NVIDIA NIM • GAF • ConvNeXt{c.RESET}")
     print()
     print(f"{c.CYAN}  ─────────────────────────────────────────────────────{c.RESET}")
     print(f"     {c.WHITE}{c.BOLD}{page_title}{c.RESET}              {left_arrow} {c.GRAY}Page {page + 1}/{total_pages}{c.RESET} {right_arrow}")

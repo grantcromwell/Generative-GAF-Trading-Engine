@@ -18,7 +18,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # 4. Run
-carter
+carter/source /Users/gdove/Desktop/Brainnet/.venv/bin/activate && cd /Users/gdove/Desktop/Brainnet/lms/carter/src && python -m brainnet.services.main info
 ```
 
 ## Model

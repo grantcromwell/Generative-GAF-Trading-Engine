@@ -1,7 +1,7 @@
 [project]
-name = "brainnet"
+name = "carter"
 version = "0.1.0"
-description = "Hybrid-adaptive quant trading system using Phi-3.5-Mini"
+description = "Phi-3.5-Vision via NVIDIA NIM for ETHUSDT-PERP scalping"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [project.scripts]
-brainnet = "brainnet.services.main:cli"
+carter = "brainnet.services.main:cli"
 
 [build-system]
 requires = ["setuptools>=61.0"]

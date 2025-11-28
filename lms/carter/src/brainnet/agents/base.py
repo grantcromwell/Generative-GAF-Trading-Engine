@@ -3,6 +3,7 @@ Phi-3.5-Vision-Instruct LLM wrapper via NVIDIA NIM API
 Unified vision-capable client for GAF image analysis
 
 NVIDIA API - no local GPU required, handles base64 PNGs natively.
+Model: microsoft/phi-3.5-vision-instruct
 """
 
 import os
@@ -24,6 +25,8 @@ class Phi35VisionClient:
     """
     Client for Phi-3.5-Vision-Instruct via NVIDIA NIM API.
     
+    Model: microsoft/phi-3.5-vision-instruct
+    
     Handles base64 PNGs of GAF images natively for research analysis.
     No local GPU required - runs on NVIDIA's infrastructure.
     
@@ -44,7 +47,7 @@ class Phi35VisionClient:
         
         # Max tokens configuration
         self.max_tokens = int(os.getenv("AGENT_MAX_TOKENS", DEFAULT_MAX_TOKENS))
-        
+
         if not self.api_key:
             raise ValueError(
                 "NVIDIA API key required. Set NVIDIA_API_KEY environment variable.\n"
@@ -133,7 +136,7 @@ class Phi35VisionClient:
         """
         Generate a response analyzing an image (GAF pattern).
         
-        NVIDIA's Phi-3.5-Vision uses inline img tags for base64 images.
+        NVIDIA's Phi-3.5-Vision-Instruct uses inline img tags for base64 images.
 
         Args:
             prompt: Text prompt for analysis
@@ -172,7 +175,7 @@ Phi35MiniClient = Phi35VisionClient
 
 
 class BaseAgent:
-    """Base class for all Brainnet agents using Phi-3.5-Vision-Instruct via NVIDIA."""
+    """Base class for all Carter agents using Phi-3.5-Vision-Instruct via NVIDIA NIM."""
 
     def __init__(
         self,

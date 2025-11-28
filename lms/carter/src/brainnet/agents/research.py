@@ -1,9 +1,10 @@
 """
 Research Agent - GAF generation + native vision analysis with Phi-3.5-Vision-Instruct
 
-Handles base64 PNGs of GAF images natively - zero extra libs needed beyond transformers.
-Runs 4-bit quantized on 6GB VRAM, perfect for live ETHUSDT-PERP scalping loops.
+Uses NVIDIA NIM API - no local GPU required.
+Model: microsoft/phi-3.5-vision-instruct
 
+Handles base64 PNGs of GAF images natively for ETHUSDT-PERP scalping.
 Also provides 3-channel GAF generation for ConvNeXt neural pattern recognition.
 """
 
@@ -26,12 +27,13 @@ from .base import BaseAgent
 class ResearchAgent(BaseAgent):
     """
     Research agent that generates Gramian Angular Field (GAF) images
-    from time series data and analyzes them using Phi-3.5-Vision-Instruct.
+    from time series data and analyzes them using Phi-3.5-Vision-Instruct
+    via NVIDIA NIM API.
     
-    Vision mode is enabled by default - Phi-3.5-Vision handles base64 PNGs
-    natively without any extra vision libraries.
+    Model: microsoft/phi-3.5-vision-instruct
     
-    Optimized for live ETHUSDT-PERP scalping without choking inference loops.
+    Vision mode is enabled by default - handles base64 PNGs natively.
+    Optimized for live ETHUSDT-PERP scalping.
     """
 
     def __init__(self, use_vision: bool = True, **kwargs):
