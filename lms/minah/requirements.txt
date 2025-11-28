@@ -1,3 +1,7 @@
+# ============================================
+# Brainnet/Minah Core Dependencies
+# ============================================
+
 # Core dependencies
 langgraph>=0.0.40
 mem0ai>=0.0.20
@@ -18,7 +22,20 @@ click>=8.1.0
 psycopg2-binary>=2.9.9
 pgvector>=0.2.0
 
-# ConvNeXt / Deep Learning (optional - for neural pattern recognition)
+# ConvNeXt / Deep Learning (for neural pattern recognition)
 torch>=2.1.0
 torchvision>=0.16.0
 scipy>=1.11.0
+
+# ============================================
+# Training Dependencies (for fine-tuning)
+# ============================================
+# For full training deps: pip install -r requirements-training.txt
+
+# HuggingFace ecosystem
+transformers>=4.36.0
+datasets>=2.16.0
+huggingface-hub>=0.20.0
+
+# Data processing
+datasketch>=1.6.0  # MinHash deduplication
