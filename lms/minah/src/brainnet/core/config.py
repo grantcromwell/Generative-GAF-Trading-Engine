@@ -109,6 +109,14 @@ class BrainnetConfig:
     pgvector_collection: str = "brainnet_memories"
     embedding_dims: int = 768
 
+    # Milvus configuration for vector storage
+    milvus_uri: str = "http://localhost:19530"
+    milvus_token: str = ""
+    milvus_collection: str = "trading_memory"
+    embedding_dimension: int = 1536
+    use_milvus: bool = False  # Flag to enable/disable Milvus integration
+    nvidia_api_key: str = "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"  # API key for NVIDIA API access for embeddings
+
     # Trading settings
     symbol: str = "ES=F"
     confidence_threshold: float = 0.78
@@ -137,6 +145,12 @@ class BrainnetConfig:
             pgvector_database=os.getenv("PGVECTOR_DB", "brainnet"),
             pgvector_collection=os.getenv("PGVECTOR_COLLECTION", "brainnet_memories"),
             embedding_dims=int(os.getenv("PGVECTOR_EMBEDDING_DIMS", "768")),
+            milvus_uri=os.getenv("MILVUS_URI", "http://localhost:19530"),
+            milvus_token=os.getenv("MILVUS_TOKEN", ""),
+            milvus_collection=os.getenv("MILVUS_COLLECTION", "trading_memory"),
+            embedding_dimension=int(os.getenv("MILVUS_EMBEDDING_DIMENSION", "1536")),
+            use_milvus=os.getenv("USE_MILVUS", "false").lower() == "true",
+            nvidia_api_key=os.getenv("NVIDIA_API_KEY", ""),
             symbol=os.getenv("YFINANCE_SYMBOL", "ES=F"),
             confidence_threshold=float(os.getenv("CONFIDENCE_THRESHOLD", "0.78")),
             max_refinements=int(os.getenv("MAX_REFINEMENTS", "3")),
@@ -168,12 +182,22 @@ class BrainnetConfig:
             "pgvector_database": self.pgvector_database,
             "pgvector_collection": self.pgvector_collection,
             "embedding_dims": self.embedding_dims,
+            "milvus_uri": self.milvus_uri,
+            "milvus_token": "***" if self.milvus_token else "",
+            "milvus_collection": self.milvus_collection,
+            "embedding_dimension": self.embedding_dimension,
+            "use_milvus": self.use_milvus,
+            "nvidia_api_key": "***" if self.nvidia_api_key else "",
             "symbol": self.symbol,
             "confidence_threshold": self.confidence_threshold,
             "max_refinements": self.max_refinements,
             "log_level": self.log_level,
             "debug": self.debug,
         }
+
+
+def get_config() -> dict:
+    return BrainnetConfig().to_dict()
 
 
 def load_config() -> dict:
@@ -209,6 +233,13 @@ def load_config() -> dict:
         # pgvector settings
         "pgvector_collection": os.getenv("PGVECTOR_COLLECTION", "brainnet_memories"),
         "embedding_dims": int(os.getenv("PGVECTOR_EMBEDDING_DIMS", "768")),
+        # Milvus settings
+        "milvus_uri": os.getenv("MILVUS_URI", "http://localhost:19530"),
+        "milvus_token": os.getenv("MILVUS_TOKEN", ""),
+        "milvus_collection": os.getenv("MILVUS_COLLECTION", "trading_memory"),
+        "embedding_dimension": int(os.getenv("MILVUS_EMBEDDING_DIMENSION", "1536")),
+        "use_milvus": os.getenv("USE_MILVUS", "false").lower() == "true",
+        "nvidia_api_key": os.getenv("NVIDIA_API_KEY", ""),
         # Trading settings
         "symbol": os.getenv("YFINANCE_SYMBOL", "ES=F"),
         "confidence_threshold": float(os.getenv("CONFIDENCE_THRESHOLD", "0.78")),

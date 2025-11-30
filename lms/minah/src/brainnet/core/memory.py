@@ -9,8 +9,10 @@ import os
 import json
 import sqlite3
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, List
 from pathlib import Path
+
+from .memory_milvus import MilvusMemoryManager
 
 try:
     from mem0 import Memory
@@ -25,7 +27,6 @@ try:
     PGVECTOR_AVAILABLE = True
 except ImportError:
     pass
-
 
 class MemoryManager:
     """
@@ -66,6 +67,8 @@ class MemoryManager:
 
         if self.use_fallback:
             self._init_sqlite_fallback()
+
+        self.milvus_manager = MilvusMemoryManager(self.config) if self.config.get('use_milvus', False) else None
 
     def _init_mem0(self):
         """Initialize Mem0 client with pgvector backend."""
@@ -221,6 +224,17 @@ class MemoryManager:
         else:
             return self._add_mem0(content, user_id, metadata)
 
+        if self.milvus_manager:
+            # Assuming item has an embedding or can generate one
+            embedding = data.get('embedding', [])
+            if embedding:
+                self.milvus_manager.add(
+                    embedding=embedding,
+                    symbol=data.get('symbol', 'unknown'),
+                    decision=data.get('decision', 'flat'),
+                    analysis_text=str(data.get('analysis', ''))
+                )
+
     def _add_mem0(self, content: str, user_id: str, metadata: Optional[dict]) -> str:
         """Add memory using Mem0."""
         try:
@@ -326,33 +340,70 @@ class MemoryManager:
         self,
         query: str,
         user_id: Optional[str] = None,
-        max_tokens: int = 2000,
+        limit: int = 5,
     ) -> str:
+        """Get relevant context from memory based on a query.
+
+        Uses Milvus when enabled; otherwise falls back to the existing
+        Mem0/SQLite-based search implementation.
         """
-        Get context string from relevant memories.
+        user_id = user_id or self.user_id
 
-        Args:
-            query: Query to find relevant memories
-            user_id: Optional user ID
-            max_tokens: Approximate max tokens in context
+        # Milvus-powered retrieval
+        if self.milvus_manager:
+            query_embedding = self._generate_embedding(query)
+            if query_embedding:
+                results = self.milvus_manager.get_context(query_embedding, top_k=limit)
+                return "\n".join(
+                    [
+                        f"Past Analysis for {r['symbol']}: Decision - {r['decision']}, Analysis - {r['analysis_text']}"
+                        for r in results
+                    ]
+                )
 
-        Returns:
-            Concatenated context string
-        """
-        results = self.search(query, user_id=user_id, limit=10)
+        # Fallback: use existing vector/text search backend
+        matches = self.search(query=query, user_id=user_id, limit=limit)
+        if not matches:
+            return ""
+        return "\n".join(m["content"] for m in matches)
 
-        context_parts = []
-        total_chars = 0
-        max_chars = max_tokens * 4  # Rough estimate
-
-        for result in results:
-            content = result.get("content", "")
-            if total_chars + len(content) > max_chars:
-                break
-            context_parts.append(content)
-            total_chars += len(content)
-
-        return "\n---\n".join(context_parts)
+    def _generate_embedding(self, text: str) -> List[float]:
+        """Generate embedding for a text query using Phi-3.5-vision-instruct via NVIDIA API."""
+        import requests
+        try:
+            invoke_url = "https://integrate.api.nvidia.com/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {self.config.get('nvidia_api_key', '')}",
+                "Accept": "application/json"
+            }
+            payload = {
+                "model": "microsoft/phi-3.5-vision-instruct",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": f"Generate a vector embedding for the following text: {text}"
+                    }
+                ],
+                "max_tokens": 512,
+                "temperature": 0.20,
+                "top_p": 0.70,
+                "stream": False
+            }
+            response = requests.post(invoke_url, headers=headers, json=payload)
+            if response.status_code == 200:
+                result = response.json()
+                # Assuming the API returns an embedding in the response; adjust based on actual API response structure
+                embedding = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+                if isinstance(embedding, list):
+                    return embedding
+                else:
+                    # Parse or convert to list if necessary; placeholder for actual parsing
+                    return [float(x) for x in embedding.split(',')] if embedding else [0.0] * self.config.get("embedding_dimension", 1536)
+            else:
+                return [0.0] * self.config.get("embedding_dimension", 1536)  # Return dummy embedding on failure
+        except Exception as e:
+            print(f"Error generating embedding: {str(e)}")
+            return [0.0] * self.config.get("embedding_dimension", 1536)  # Return dummy embedding on error
 
     def get_all(
         self,
@@ -417,3 +468,5 @@ class MemoryManager:
         """Close connections."""
         if self.use_fallback and hasattr(self, 'sqlite_conn'):
             self.sqlite_conn.close()
+        if self.milvus_manager:
+            self.milvus_manager.close()

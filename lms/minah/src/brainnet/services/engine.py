@@ -13,6 +13,7 @@ import yfinance as yf
 
 from brainnet.agents import ResearchAgent, ReasoningAgent, _CONVNEXT_AVAILABLE
 from brainnet.core import MemoryManager, load_config
+from brainnet.services.data_flywheel import DataFlywheel
 
 
 def run_single_analysis(symbol: str = "ES=F", interval: str = "5m") -> dict:
@@ -33,6 +34,7 @@ def run_single_analysis(symbol: str = "ES=F", interval: str = "5m") -> dict:
     # Initialize agents
     research = ResearchAgent()
     reasoning = ReasoningAgent()
+    flywheel = DataFlywheel()
     
     # Fetch data
     print(f"\n[1/4] Fetching {symbol} data...")
@@ -119,6 +121,20 @@ def run_single_analysis(symbol: str = "ES=F", interval: str = "5m") -> dict:
         except:
             pass
     
+    # Collect data in flywheel
+    result = {
+        "symbol": symbol,
+        "price": latest_price,
+        "decision": pos,
+        "confidence": confidence,
+        "trend": "Bullish" if analysis['features']['trend_score'] > 0 else "Bearish",
+        "momentum": "Positive" if analysis['features']['momentum'] > 0 else "Negative",
+        "features": analysis['features'],
+        "refinements": refinements,
+    }
+    flywheel.collect_trading_data(result)
+    print("    ✓ Collected in Data Flywheel")
+    
     # Summary
     trend = "Bullish" if analysis['features']['trend_score'] > 0 else "Bearish"
     momentum = "Positive" if analysis['features']['momentum'] > 0 else "Negative"
@@ -134,16 +150,7 @@ def run_single_analysis(symbol: str = "ES=F", interval: str = "5m") -> dict:
     print(f"  Signal:     {pos}")
     print(f"{'='*60}\n")
     
-    return {
-        "symbol": symbol,
-        "price": latest_price,
-        "decision": pos,
-        "confidence": confidence,
-        "trend": trend,
-        "momentum": momentum,
-        "features": analysis['features'],
-        "refinements": refinements,
-    }
+    return result
 
 
 def run_trading_loop(symbol: str = "ES=F", interval: str = "5m", delay: int = 300):
@@ -550,4 +557,3 @@ def run_convnext_trading_loop(
         
         print(f"\nSleeping {delay}s...")
         time.sleep(delay)
-
