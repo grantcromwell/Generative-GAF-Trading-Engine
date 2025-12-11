@@ -1,0 +1,15 @@
+{
+  "total_return": 0.0029999999999998916,
+  "annualized_return": 0.286110766005085,
+  "sharpe_ratio": 6.625005182207744,
+  "max_drawdown": -0.0014932802389248383,
+  "drawdown_duration": 0,
+  "win_rate": 0.0,
+  "avg_win": 0.0,
+  "avg_loss": 0.0,
+  "profit_factor": Infinity,
+  "num_trades": 3,
+  "num_winning_trades": 2,
+  "num_losing_trades": 1,
+  "avg_trade_return": 10.0
+}

@@ -11,9 +11,17 @@ from typing import Optional
 
 import yfinance as yf
 
+from typing import List, Dict, Optional, Tuple
+import time
+from datetime import datetime
+
+import yfinance as yf
+import numpy as np
+
 from brainnet.agents import ResearchAgent, ReasoningAgent, _CONVNEXT_AVAILABLE
 from brainnet.core import MemoryManager, load_config
 from brainnet.services.data_flywheel import DataFlywheel
+from brainnet.services.performance import calculate_metrics, format_metrics
 
 
 def run_single_analysis(symbol: str = "ES=F", interval: str = "5m") -> dict:
@@ -420,19 +428,104 @@ def run_convnext_analysis(
     return result
 
 
-def run_convnext_trading_loop(
+class TradeTracker:
+    """Tracks trades and calculates performance metrics."""
+    
+    def __init__(self, initial_balance: float = 10000.0):
+        self.initial_balance = initial_balance
+        self.balance = initial_balance
+        self.position = 0  # 0: flat, 1: long, -1: short
+        self.entry_price = 0.0
+        self.trades: List[Dict] = []
+        self.equity_curve = [initial_balance]
+        self.returns: List[float] = []
+        
+    def enter_trade(self, direction: int, price: float, timestamp: str, confidence: float) -> None:
+        """Enter a new trade."""
+        if self.position != 0:
+            self.exit_trade(price, timestamp, "Switching position")
+            
+        self.position = direction
+        self.entry_price = price
+        self.trades.append({
+            'entry_time': timestamp,
+            'entry_price': price,
+            'direction': direction,
+            'confidence': confidence,
+            'exit_time': None,
+            'exit_price': None,
+            'pnl': None,
+            'return_pct': None,
+            'exit_reason': None
+        })
+    
+    def exit_trade(self, price: float, timestamp: str, reason: str = "Exit signal") -> Optional[Dict]:
+        """Exit the current trade if any."""
+        if self.position == 0:
+            return None
+            
+        # Calculate P&L
+        if self.position == 1:  # Long
+            pnl = price - self.entry_price
+        else:  # Short
+            pnl = self.entry_price - price
+            
+        return_pct = pnl / self.entry_price
+        
+        # Update trade record
+        if self.trades and self.trades[-1]['exit_time'] is None:
+            trade = self.trades[-1]
+            trade.update({
+                'exit_time': timestamp,
+                'exit_price': price,
+                'pnl': pnl,
+                'return_pct': return_pct,
+                'exit_reason': reason
+            })
+            
+            # Update balance and equity curve
+            self.balance += pnl
+            self.equity_curve.append(self.balance)
+            self.returns.append(return_pct)
+            
+            # Reset position
+            self.position = 0
+            self.entry_price = 0.0
+            
+            return trade
+        return None
+    
+    def get_performance_metrics(self) -> Dict:
+        """Calculate and return performance metrics."""
+        if not self.returns:
+            return {}
+            
+        return calculate_metrics(
+            returns=self.returns,
+            equity_curve=self.equity_curve,
+            trades=[t for t in self.trades if t.get('exit_time') is not None]
+        )
+
+
+def run_confidence_trading_loop(
     symbol: str = "ES=F",
     interval: str = "5m",
     delay: int = 300,
-    combine_with_llm: bool = True,
-    device: str = "auto",
-):
+    initial_balance: float = 10000.0,
+    position_size: float = 0.1,  # 10% of balance per trade
+    risk_free_rate: float = 0.05,  # 5% annual risk-free rate
+) -> None:
     """
-    Continuous trading loop with ConvNeXt pattern analysis.
+    Run a trading loop that uses confidence scores for trading decisions.
+    
+    Strategy:
+    - Go LONG when confidence is 80-100
+    - Go SHORT when confidence is 0-20
+    - Exit positions when confidence returns to 20-80
     
     Args:
-        symbol: Trading symbol
-        interval: Data interval
+        symbol: Trading symbol (e.g., 'ES=F', 'BTC-USD')
+        interval: Data interval (e.g., '1m', '5m', '1h')
         delay: Seconds between iterations
         combine_with_llm: Whether to ensemble with LLM analysis
         device: Compute device for ConvNeXt

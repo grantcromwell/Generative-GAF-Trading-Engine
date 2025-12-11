@@ -54,15 +54,6 @@ pytest_cache/
 *.pot
 
 # Environments
-.env
-.env.local
-.env.*.local
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -127,14 +118,7 @@ models/*.safetensors
 torch_cache/
 
 # Data files
-data/
-*.csv
-*.json
-!pyproject.toml
-*.parquet
-*.feather
-*.h5
-*.hdf5
+
 
 # Logs
 logs/
