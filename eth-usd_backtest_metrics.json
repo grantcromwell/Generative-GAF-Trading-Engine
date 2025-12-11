@@ -1,0 +1,9 @@
+{
+  "symbol": "ETH-USD",
+  "period_days": 365,
+  "interval": "1d",
+  "total_return": -0.17476893068322885,
+  "annualized_return": -0.12452323251595487,
+  "sharpe_ratio": 0.020945053752889707,
+  "num_returns": 364
+}

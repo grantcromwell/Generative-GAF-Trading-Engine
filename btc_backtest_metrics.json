@@ -1,0 +1,9 @@
+{
+  "symbol": "BTC-USD",
+  "period_days": 365,
+  "interval": "1d",
+  "total_return": -0.09721749335285823,
+  "annualized_return": -0.06835627586020776,
+  "sharpe_ratio": -0.16341472136290613,
+  "num_returns": 364
+}

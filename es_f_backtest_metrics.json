@@ -1,0 +1,9 @@
+{
+  "symbol": "ES=F",
+  "period_days": 301,
+  "interval": "1d",
+  "total_return": 0.1888425080441778,
+  "annualized_return": 0.1563902817175804,
+  "sharpe_ratio": 0.6108648022327111,
+  "num_returns": 300
+}
