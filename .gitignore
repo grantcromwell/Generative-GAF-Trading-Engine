@@ -1,3 +1,7 @@
+# ============================================
+# Python
+# ============================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -53,45 +57,73 @@ pytest_cache/
 *.mo
 *.pot
 
-# Environments
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
+# Type checkers
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre type checker
 .pyre/
-
-# pytype static type analyzer
 .pytype/
 
 # Cython debug symbols
 cython_debug/
 
-# IDEs and editors
-.idea/
+# ============================================
+# Virtual Environments
+# ============================================
+
+.venv/
+venv/
+ENV/
+env/
+.env.local
+.env.*.local
+
+# ============================================
+# IDEs and Editors
+# ============================================
+
+# VSCode
 .vscode/
-*.swp
-*.swo
-*~
-.project
-.pydevproject
-.settings/
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
 *.sublime-project
 *.sublime-workspace
 
+# Vim
+*.swp
+*.swo
+*~
+
+# Eclipse
+.project
+.pydevproject
+.settings/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# ============================================
 # Jupyter Notebook
+# ============================================
+
 .ipynb_checkpoints/
 *.ipynb
 
@@ -99,56 +131,217 @@ cython_debug/
 profile_default/
 ipython_config.py
 
-# Brainnet specific
+# ============================================
+# Environment Variables & Secrets
+# ============================================
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.template
+
+# API keys and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+secrets/
+.secrets
+credentials.json
+service-account*.json
+
+# SSH keys
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# ============================================
+# Brainnet Specific
+# ============================================
+
+# Database files
 brainnet_memory.db
 *.db
 *.sqlite
 *.sqlite3
+milvus_lite.db
 
-# Model weights and caches
+# Model weights and checkpoints
 models/*.pt
 models/*.pth
 models/*.bin
 models/*.safetensors
+models/*.ckpt
+models/*.h5
+models/*.pkl
+models/*.pickle
 !models/.gitkeep
+!models/README.md
 
-# PyTorch / HuggingFace cache
+# Training artifacts
+checkpoints/
+runs/
+wandb/
+tensorboard/
+
+# PyTorch / ML caches
 .cache/
 *.onnx
 torch_cache/
+huggingface_cache/
+transformers_cache/
 
-# Data files
+# Trading data and results
+data/*.csv
+data/*.json
+data/*.parquet
+!data/.gitkeep
+!data/README.md
+!data/quant_train.jsonl
 
+# Backtest results and metrics
+*_backtest_metrics.json
+*_performance_metrics.json
+backtest_results/
+performance_reports/
 
+# Live trading logs (CRITICAL - never commit)
+trades.log
+positions.log
+orders.log
+execution_logs/
+
+# ============================================
 # Logs
+# ============================================
+
 logs/
 *.log
+*.log.*
+log_*.txt
 
-# OS generated files
+# ============================================
+# OS Generated Files
+# ============================================
+
+# macOS
 .DS_Store
 .DS_Store?
 ._*
+.AppleDouble
+.LSOverride
 .Spotlight-V100
 .Trashes
-ehthumbs.db
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.fseventsd
+.TemporaryItems
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
 
-# Secrets and credentials
-*.pem
-*.key
-secrets/
-.secrets
+# Linux
+.directory
+.Trash-*
+.nfs*
 
-# ChromaDB (legacy - now using pgvector)
-chroma_db/
-chromadb/
+# ============================================
+# Documentation
+# ============================================
 
-# Temporary files
+# Keep templates, ignore drafts
+docs/drafts/
+docs/private/
+*.draft.md
+
+# mkdocs
+/site
+
+# ============================================
+# Temporary Files
+# ============================================
+
 tmp/
 temp/
 *.tmp
 *.bak
+*.swp
+*.swo
+*~
 
-# Documentation (keep templates, ignore drafts)
-docs/drafts/
+# ============================================
+# Vector Databases
+# ============================================
+
+# ChromaDB (legacy)
+chroma_db/
+chromadb/
+
+# Milvus
+milvus_data/
+*.milvus
+
+# Qdrant
+qdrant_storage/
+
+# ============================================
+# Docker & Deployment
+# ============================================
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Kubernetes
+*.kubeconfig
+
+# ============================================
+# CI/CD
+# ============================================
+
+# GitHub Actions secrets
+.github/secrets/
+
+# ============================================
+# Research & Experiments (Optional)
+# ============================================
+
+# Notebooks with sensitive data
+notebooks/private/
+notebooks/*_private.ipynb
+notebooks/*_secret.ipynb
+
+# Experimental results
+experiments/
+scratch/
+sandbox/
+
+# ============================================
+# Financial Data (CRITICAL)
+# ============================================
+
+# Never commit real trading data
+*_trades.csv
+*_positions.csv
+*_pnl.csv
+account_*.json
+portfolio_*.json
+balance_*.json
+
+# API credentials for exchanges
+exchange_keys.json
+api_config.json
+broker_credentials.*
 

@@ -514,6 +514,8 @@ def run_confidence_trading_loop(
     initial_balance: float = 10000.0,
     position_size: float = 0.1,  # 10% of balance per trade
     risk_free_rate: float = 0.05,  # 5% annual risk-free rate
+    combine_with_llm: bool = True,
+    device: str = "auto",
 ) -> None:
     """
     Run a trading loop that uses confidence scores for trading decisions.
@@ -527,6 +529,9 @@ def run_confidence_trading_loop(
         symbol: Trading symbol (e.g., 'ES=F', 'BTC-USD')
         interval: Data interval (e.g., '1m', '5m', '1h')
         delay: Seconds between iterations
+        initial_balance: Starting capital
+        position_size: Fraction of balance per trade
+        risk_free_rate: Annual risk-free rate for Sharpe calculation
         combine_with_llm: Whether to ensemble with LLM analysis
         device: Compute device for ConvNeXt
     """

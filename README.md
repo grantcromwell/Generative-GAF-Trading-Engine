@@ -102,21 +102,46 @@ brainnet/
 git clone <repo-url>
 cd brainnet
 
-# Create virtual environment
-python -m venv .venv
+# Create virtual environment (Python 3.10+ required)
+python3.11 -m venv .venv
 source .venv/bin/activate  # Linux/Mac
 # or: .venv\Scripts\activate  # Windows
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (Minah is the primary implementation)
+pip install -r lms/minah/requirements.txt
 
 # Install brainnet in development mode
-pip install -e .
+pip install -e lms/minah/
 
 # Copy and configure environment
 cp .env.example .env
 # Edit .env with your settings
 ```
+
+### Multiple Implementations
+
+Brainnet has three implementations in the `lms/` directory:
+- **minah/** - Primary implementation (most complete, with Milvus support)
+- **carter/** - Alternative implementation
+- **banis/** - Another variant
+
+**By default, Minah is installed.** To switch implementations:
+
+```bash
+# Uninstall current
+pip uninstall brainnet -y
+
+# Install a different implementation
+pip install -e lms/carter/   # or lms/banis/
+```
+
+**To verify which implementation is running:**
+
+```bash
+python -c "import brainnet; print('Using:', brainnet.__file__)"
+```
+
+This will show the path to the active implementation (e.g., `.../lms/minah/src/brainnet/...`).
 
 ### pgvector Setup (Required for Memory)
 
