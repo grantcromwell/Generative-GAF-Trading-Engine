@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Brainnet is a production-ready quantitative trading platform that combines multiple AI paradigms for robust market prediction. The system uses Gramian Angular Field (GAF) pattern recognition, ConvNeXt-Tiny neural networks, and LLM-as-a-judge confidence calibration with persistent vector memory.
+Brainnet is quantitative trading platform that combines multiple AI paradigms for robust market prediction. The system uses Gramian Angular Field (GAF) pattern recognition, ConvNeXt-Tiny neural networks, and LLM-as-a-judge confidence calibration with persistent vector memory.
 
 ## Architecture
 

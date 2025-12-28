@@ -7,10 +7,11 @@ VENV_PATH="$SCRIPT_DIR/.venv"
 
 if [ -d "$VENV_PATH" ]; then
     source "$VENV_PATH/bin/activate"
-    export PYTHONPATH="$SCRIPT_DIR/lms/minah/src:$PYTHONPATH"
+    export PYTHONPATH="$SCRIPT_DIR/lms/banis/src:$PYTHONPATH"
     # Only show message if not already activated
     if [ -z "$VIRTUAL_ENV" ] || [ "$VIRTUAL_ENV" != "$VENV_PATH" ]; then
         echo "✅ Brainnet virtual environment activated (Python $(python --version | cut -d' ' -f2))"
+        echo "   Using: Banis implementation"
     fi
 else
     echo "❌ Virtual environment not found at $VENV_PATH"
