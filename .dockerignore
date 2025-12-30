@@ -1,0 +1,78 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Documentation
+docs/_build/
+*.md
+!README.md
+
+# Logs
+*.log
+logs/
+
+# Environment files (will be mounted or passed as env vars)
+.env
+.env.local
+.env.*.local
+
+# Model artifacts (large files, mount as volume if needed)
+models/*.pth
+models/*.pt
+models/*.ckpt
+*.h5
+*.hdf5
+
+# Data files
+*.csv
+*.parquet
+*.pkl
+*.pickle
+data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Lock files (not needed in container)
+*.lock
+uv.lock
+
+# Scripts (not needed in runtime container)
+scripts/

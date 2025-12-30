@@ -1,8 +1,8 @@
 # Hybrid Adaptive Trading System
 
-**A production-ready quantitative trading platform powered by Phi-3.5-Mini and ConvNeXt-Tiny**
+**A quantitative trading platform powered by Phi-3.5-Mini and ConvNeXt-Tiny**
 
-This system is a production-ready multi-agent trading platform that combines:
+This system is a multi-agent trading platform that combines:
 - **Gramian Angular Field (GAF)** pattern recognition
 - **ConvNeXt-Tiny** neural network for regime/direction/volatility prediction
 - **LLM-as-a-judge** confidence calibration
@@ -16,6 +16,7 @@ This system is a production-ready multi-agent trading platform that combines:
 - [Features](#features)
 - [Architecture](#architecture)
 - [Installation](#installation)
+- [Docker](#docker)
 - [Configuration](#configuration)
 - [Quick Start](#quick-start)
 - [Core Components](#core-components)
@@ -170,6 +171,187 @@ Load `phi-3.5-vision-instruct` in LM Studio and add:
 
 ```bash
 USE_VISION=true
+```
+
+### Docker Installation
+
+Prerequisites:
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+- (Optional) LM Studio or Ollama running locally for LLM inference
+
+Quick Start:
+
+1. **Copy environment file** (if not exists):
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit `.env`** with your configuration:
+   - Set `PGVECTOR_PASSWORD` for PostgreSQL
+   - Configure `OLLAMA_BASE_URL` if using LM Studio/Ollama
+   - Adjust other settings as needed
+
+3. **Start services**:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Check logs**:
+   ```bash
+   docker-compose logs -f app
+   ```
+
+5. **Access the API**:
+   - Health check: http://localhost:8000/health
+   - API root: http://localhost:8000/
+
+---
+
+## Docker
+
+### Services
+
+#### PostgreSQL with pgvector
+
+The `postgres` service provides:
+- PostgreSQL 16 with pgvector extension
+- Persistent data storage in `postgres_data` volume
+- Health checks for dependency management
+
+**Connection details** (from app container):
+- Host: `postgres`
+- Port: `5432`
+- Database: `trading_system` (default)
+- User: `postgres` (default)
+- Password: Set via `PGVECTOR_PASSWORD` env var
+
+#### Trading Engine Application
+
+The `app` service provides:
+- FastAPI web server on port 8000
+- WebSocket endpoint at `/ws`
+- CLI commands via `brainnet.services.main`
+
+### Building the Image
+
+Build the Docker image manually:
+
+```bash
+docker build -t gaf-trading-engine .
+```
+
+### Running Commands
+
+Execute CLI commands in the container:
+
+```bash
+# Run single analysis
+docker-compose exec app python -m brainnet.services.main analyze --symbol ES=F
+
+# Start trading loop
+docker-compose exec app python -m brainnet.services.main loop --symbol ES=F --interval 5m
+
+# Show model info
+docker-compose exec app python -m brainnet.services.main info
+```
+
+### Docker Environment Variables
+
+Key environment variables for Docker (see `.env.example`):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `LLM_BACKEND` | `local` | Backend type: `local`, `azure`, `hf` |
+| `OLLAMA_BASE_URL` | `http://127.0.0.1:1234` | LM Studio/Ollama URL |
+| `OLLAMA_MODEL` | `phi-3.5-mini-instruct` | Model identifier |
+| `PGVECTOR_HOST` | `postgres` | PostgreSQL host (use `postgres` in docker-compose) |
+| `PGVECTOR_PORT` | `5432` | PostgreSQL port |
+| `PGVECTOR_PASSWORD` | `trading_system` | PostgreSQL password |
+| `CONFIDENCE_THRESHOLD` | `0.78` | Minimum confidence for trading |
+| `APP_PORT` | `8000` | Application port |
+
+### Volumes
+
+- `postgres_data`: PostgreSQL data persistence
+- `./models:/app/models`: Model artifacts (mounted from host)
+- `./lms/banis/src:/app/lms/banis/src`: Source code (for development)
+
+### Docker Troubleshooting
+
+#### PostgreSQL Connection Issues
+
+If the app can't connect to PostgreSQL:
+
+```bash
+# Check PostgreSQL logs
+docker-compose logs postgres
+
+# Verify pgvector extension
+docker-compose exec postgres psql -U postgres -d trading_system -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
+```
+
+#### LLM Backend Connection
+
+For local LLM backends (LM Studio/Ollama), use `host.docker.internal`:
+
+```bash
+OLLAMA_BASE_URL=http://host.docker.internal:1234
+```
+
+On Linux, the docker-compose.yml already includes `extra_hosts` configuration for this.
+
+#### Port Conflicts
+
+If port 8000 or 5432 is already in use, change them in `.env`:
+
+```bash
+APP_PORT=8001
+PGVECTOR_PORT=5433
+```
+
+### Development Mode
+
+For development with hot-reload, source code is already mounted in docker-compose.yml. Restart the container after code changes:
+
+```bash
+docker-compose restart app
+```
+
+### Production Considerations
+
+1. **Security**: Change default PostgreSQL password
+2. **Resource Limits**: Add resource limits to docker-compose.yml
+3. **Logging**: Configure log rotation
+4. **Backups**: Set up PostgreSQL backup strategy
+5. **Monitoring**: Add health checks and monitoring
+
+Example resource limits:
+
+```yaml
+services:
+  app:
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+```
+
+### Stopping Services
+
+```bash
+# Stop services (keeps data)
+docker-compose stop
+
+# Stop and remove containers (keeps volumes)
+docker-compose down
+
+# Stop and remove everything including volumes
+docker-compose down -v
 ```
 
 ---

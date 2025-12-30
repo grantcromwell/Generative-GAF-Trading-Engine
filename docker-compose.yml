@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with pgvector extension
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: gaf-postgres
+    environment:
+      POSTGRES_USER: ${PGVECTOR_USER:-postgres}
+      POSTGRES_PASSWORD: ${PGVECTOR_PASSWORD:-trading_system}
+      POSTGRES_DB: ${PGVECTOR_DB:-trading_system}
+    ports:
+      - "${PGVECTOR_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGVECTOR_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gaf-network
+
+  # Main trading engine application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gaf-trading-engine
+    environment:
+      # LLM Backend Configuration
+      LLM_BACKEND: ${LLM_BACKEND:-local}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:1234}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-phi-3.5-mini-instruct}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      
+      # Model Settings
+      AGENT_MAX_TOKENS: ${AGENT_MAX_TOKENS:-31000}
+      AGENT_TEMPERATURE: ${AGENT_TEMPERATURE:-0.1}
+      USE_VISION: ${USE_VISION:-false}
+      
+      # Memory Configuration
+      MEMORY_DB: ${MEMORY_DB:-pgvector}
+      PGVECTOR_HOST: postgres
+      PGVECTOR_PORT: 5432
+      PGVECTOR_USER: ${PGVECTOR_USER:-postgres}
+      PGVECTOR_PASSWORD: ${PGVECTOR_PASSWORD:-trading_system}
+      PGVECTOR_DB: ${PGVECTOR_DB:-trading_system}
+      
+      # Trading Configuration
+      CONFIDENCE_THRESHOLD: ${CONFIDENCE_THRESHOLD:-0.78}
+      MAX_REFINEMENTS: ${MAX_REFINEMENTS:-3}
+      
+      # Python
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - ./models:/app/models
+      - ./lms/banis/src:/app/lms/banis/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - gaf-network
+    command: ["python", "-m", "brainnet.services.main", "server", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  gaf-network:
+    driver: bridge
+
